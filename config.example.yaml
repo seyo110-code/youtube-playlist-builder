@@ -1,0 +1,36 @@
+oauth:
+  client_secret_file: ".secrets/client_secret.json"
+  token_file: ".secrets/token.json"
+
+defaults:
+  max_add_per_topic: 5
+  relative_view_threshold: 0.6
+  min_duration_seconds: 0
+  min_view_count: 0
+
+topics:
+  - name: "tech-news"
+    playlist_id: "PL_REPLACE_WITH_REAL_ID"
+    channels:
+      - "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+    keywords:
+      - "python release"
+      - "developer news"
+    search_days_fresh: 30
+    search_days_archive: 180
+    mix_fresh_ratio: 0.6
+    min_duration_seconds: 180
+    min_view_count: 5000
+
+  - name: "music"
+    playlist_id: "PL_REPLACE_WITH_REAL_ID"
+    channels:
+      - "UC-9-kyTW8ZkZNDHQJ6FgpwQ"
+    keywords:
+      - "official music video"
+      - "live performance"
+    search_days_fresh: 30
+    search_days_archive: 3650
+    mix_fresh_ratio: 0.6
+    min_duration_seconds: 180
+    min_view_count: 100000
