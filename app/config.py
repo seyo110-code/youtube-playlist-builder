@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field, ValidationError, field_validator
@@ -14,6 +14,7 @@ class OAuthConfig(BaseModel):
 
 class DefaultsConfig(BaseModel):
     max_add_per_topic: int = Field(default=5, ge=1, le=100)
+    max_playlist_size: int = Field(default=20, ge=1, le=5000)
     relative_view_threshold: float = Field(default=0.6, gt=0, le=5)
     min_duration_seconds: int = Field(default=0, ge=0, le=86400)
     min_view_count: int = Field(default=0, ge=0)
@@ -26,8 +27,10 @@ class TopicConfig(BaseModel):
     keywords: list[str] = Field(default_factory=list)
     search_days_fresh: int = Field(default=30, ge=1, le=3650)
     search_days_archive: int = Field(default=180, ge=1, le=36500)
+    search_order: Literal["date", "viewCount"] = "date"
     mix_fresh_ratio: float = Field(default=0.6, ge=0, le=1)
     max_add_per_topic: int | None = Field(default=None, ge=1, le=100)
+    max_playlist_size: int | None = Field(default=None, ge=1, le=5000)
     relative_view_threshold: float | None = Field(default=None, gt=0, le=5)
     min_duration_seconds: int | None = Field(default=None, ge=0, le=86400)
     min_view_count: int | None = Field(default=None, ge=0)

@@ -4,6 +4,7 @@ oauth:
 
 defaults:
   max_add_per_topic: 5
+  max_playlist_size: 20
   relative_view_threshold: 0.6
   min_duration_seconds: 0
   min_view_count: 0
@@ -18,13 +19,13 @@ topics:
       - "생성형 AI 뉴스"
       - "개발자 뉴스"
       - "LLM 업데이트"
-      - "오픈소스 AI"
-      - "파이썬 업데이트"
     search_days_fresh: 30
     search_days_archive: 180
+    search_order: "date"
     mix_fresh_ratio: 0.6
-    min_duration_seconds: 180
-    min_view_count: 3000
+    max_playlist_size: 20
+    min_duration_seconds: 300
+    min_view_count: 10000
 
   - name: "music"
     playlist_id: "PLhYSnoop5TUtNqG4AzKxQNGqv6qBNs_3Q"
@@ -32,12 +33,13 @@ topics:
       - "UC-9-kyTW8ZkZNDHQJ6FgpwQ"
     keywords:
       - "official music video"
-      - "live performance"
-      - "pop music"
-      - "kpop official mv"
-      - "billboard hot 100"
+      - "official audio"
+      - "live at"
+      - "lyrics video"
     search_days_fresh: 30
     search_days_archive: 3650
+    search_order: "viewCount"
     mix_fresh_ratio: 0.6
+    max_playlist_size: 20
     min_duration_seconds: 180
-    min_view_count: 100000
+    min_view_count: 300000

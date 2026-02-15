@@ -1,4 +1,10 @@
-from app.ranking import apply_quality_filters, apply_relative_view_filter, select_candidates
+from app.feedback import FeedbackProfile
+from app.ranking import (
+    apply_feedback_scores,
+    apply_quality_filters,
+    apply_relative_view_filter,
+    select_candidates,
+)
 
 
 def test_relative_view_filter_keeps_above_threshold() -> None:
@@ -50,3 +56,18 @@ def test_apply_quality_filters_excludes_short_and_low_views() -> None:
     )
     ids = {item["video_id"] for item in filtered}
     assert ids == {"v3"}
+
+
+def test_apply_feedback_scores_adds_preference_score() -> None:
+    candidates = [
+        {"video_id": "v1", "channel_id": "c1"},
+        {"video_id": "v2", "channel_id": "c2"},
+    ]
+    profile = FeedbackProfile(
+        video_bias={"v1": 2.0},
+        channel_bias={"c2": -1.0},
+    )
+    out = apply_feedback_scores(candidates, profile)
+    out_map = {x["video_id"]: x["preference_score"] for x in out}
+    assert out_map["v1"] == 2.0
+    assert out_map["v2"] == -1.0

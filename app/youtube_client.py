@@ -9,6 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from .discovery import days_ago_iso, extract_video, parse_iso8601_duration_seconds
+from .quota import QuotaTracker
 
 SCOPES = ["https://www.googleapis.com/auth/youtube"]
 
@@ -40,15 +41,23 @@ def build_client(creds: Credentials) -> Any:
     return build("youtube", "v3", credentials=creds)
 
 
-def fetch_channel_recent_videos(youtube: Any, channel_id: str, days: int) -> list[dict[str, Any]]:
+def fetch_channel_recent_videos(
+    youtube: Any,
+    channel_id: str,
+    days: int,
+    order: str = "date",
+    tracker: QuotaTracker | None = None,
+) -> list[dict[str, Any]]:
     published_after = days_ago_iso(days)
+    if tracker:
+        tracker.track("search.list", 100)
     response = (
         youtube.search()
         .list(
             part="snippet",
             channelId=channel_id,
             type="video",
-            order="date",
+            order=order,
             maxResults=25,
             publishedAfter=published_after,
         )
@@ -57,15 +66,23 @@ def fetch_channel_recent_videos(youtube: Any, channel_id: str, days: int) -> lis
     return [extract_video(item, source=f"channel:{channel_id}") for item in response.get("items", [])]
 
 
-def fetch_keyword_videos(youtube: Any, keyword: str, days: int) -> list[dict[str, Any]]:
+def fetch_keyword_videos(
+    youtube: Any,
+    keyword: str,
+    days: int,
+    order: str = "date",
+    tracker: QuotaTracker | None = None,
+) -> list[dict[str, Any]]:
     published_after = days_ago_iso(days)
+    if tracker:
+        tracker.track("search.list", 100)
     response = (
         youtube.search()
         .list(
             part="snippet",
             q=keyword,
             type="video",
-            order="date",
+            order=order,
             maxResults=25,
             publishedAfter=published_after,
         )
@@ -74,7 +91,11 @@ def fetch_keyword_videos(youtube: Any, keyword: str, days: int) -> list[dict[str
     return [extract_video(item, source=f"keyword:{keyword}") for item in response.get("items", [])]
 
 
-def hydrate_video_stats(youtube: Any, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def hydrate_video_stats(
+    youtube: Any,
+    candidates: list[dict[str, Any]],
+    tracker: QuotaTracker | None = None,
+) -> list[dict[str, Any]]:
     ids = [c["video_id"] for c in candidates if c.get("video_id")]
     if not ids:
         return []
@@ -83,6 +104,8 @@ def hydrate_video_stats(youtube: Any, candidates: list[dict[str, Any]]) -> list[
     duration_map: dict[str, int] = {}
     for i in range(0, len(ids), 50):
         chunk = ids[i : i + 50]
+        if tracker:
+            tracker.track("videos.list", 1)
         response = (
             youtube.videos()
             .list(part="statistics,contentDetails", id=",".join(chunk), maxResults=50)

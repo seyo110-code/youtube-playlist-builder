@@ -5,6 +5,7 @@ from statistics import median
 from typing import Any
 
 from .discovery import parse_youtube_datetime
+from .feedback import FeedbackProfile
 
 
 class SelectionResult(dict):
@@ -69,11 +70,28 @@ def _sort_desc(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(
         candidates,
         key=lambda c: (
+            float(c.get("preference_score") or 0.0),
             parse_youtube_datetime(c.get("published_at")),
             int(c.get("view_count") or 0),
         ),
         reverse=True,
     )
+
+
+def apply_feedback_scores(
+    candidates: list[dict[str, Any]],
+    profile: FeedbackProfile,
+) -> list[dict[str, Any]]:
+    scored: list[dict[str, Any]] = []
+    for c in candidates:
+        item = dict(c)
+        video_id = item.get("video_id") or ""
+        channel_id = item.get("channel_id") or ""
+        video_bias = profile.video_bias.get(video_id, 0.0)
+        channel_bias = profile.channel_bias.get(channel_id, 0.0)
+        item["preference_score"] = video_bias + channel_bias
+        scored.append(item)
+    return scored
 
 
 def select_candidates(
